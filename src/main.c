@@ -276,6 +276,30 @@ void update_upgrades(int buttons) {
     }
 }
 
+/* Seven-segment pixel digits keep the HUD readable without relying on
+ * a text renderer or font asset. */
+void draw_digit(int x, int y, int d, int color) {
+    int m;
+    m = 0;
+    if (d == 0) m = 119;
+    if (d == 1) m = 6;
+    if (d == 2) m = 91;
+    if (d == 3) m = 79;
+    if (d == 4) m = 46;
+    if (d == 5) m = 109;
+    if (d == 6) m = 125;
+    if (d == 7) m = 7;
+    if (d == 8) m = 127;
+    if (d == 9) m = 111;
+    if ((m & 1) != 0) rect(((x + 3) << 16) | y, (10 << 16) | 3, color);
+    if ((m & 2) != 0) rect((x << 16) | (y + 3), (3 << 16) | 9, color);
+    if ((m & 4) != 0) rect(((x + 13) << 16) | (y + 3), (3 << 16) | 9, color);
+    if ((m & 8) != 0) rect(((x + 3) << 16) | (y + 13), (10 << 16) | 3, color);
+    if ((m & 16) != 0) rect((x << 16) | (y + 16), (3 << 16) | 9, color);
+    if ((m & 32) != 0) rect(((x + 13) << 16) | (y + 16), (3 << 16) | 9, color);
+    if ((m & 64) != 0) rect(((x + 3) << 16) | (y + 25), (10 << 16) | 3, color);
+}
+
 void render_game(void) {
     int i;
     int a;
@@ -316,6 +340,16 @@ void render_game(void) {
         if (hpw > 220) hpw = 220;
         rect((18 << 16) | 34, (hpw << 16) | 5, COLOR_DAMAGE);
     }
+
+    /* Numeric HUD: score (three digits), wave, and tower HP. */
+    draw_digit(20, 48, (g_score / 100) % 10, COLOR_WHITE);
+    draw_digit(40, 48, (g_score / 10) % 10, COLOR_WHITE);
+    draw_digit(60, 48, g_score % 10, COLOR_WHITE);
+    draw_digit(744, 48, (g_wave / 10) % 10, COLOR_WHITE);
+    draw_digit(764, 48, g_wave % 10, COLOR_WHITE);
+    draw_digit(844, 48, (g_tower_hp / 100) % 10, COLOR_HEALTH);
+    draw_digit(864, 48, (g_tower_hp / 10) % 10, COLOR_HEALTH);
+    draw_digit(884, 48, g_tower_hp % 10, COLOR_HEALTH);
 
     /* Red pixel enemies with darker outlines. */
     for (i = 0; i < ENEMY_COUNT; i++) {
